@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Applications · BW Robotics</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='5') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='site.css', v='1') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='factory.css', v='1') }}">
+  <script type="importmap">
+  {"imports":{"three":"{{ url_for('static', filename='vendor/three/three.module.min.js') }}","three/addons/":"{{ url_for('static', filename='vendor/three/addons/') }}"}}
+  </script>
+</head>
+<body class="applications-page">
+  <a class="skip-link" href="#applications-main">Skip to applications</a>
+  <header class="app-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="/"><span class="brand-icon">BW</span> BW ROBOTICS</a>
+      <nav class="main-nav" aria-label="Primary navigation"><a href="/">Home</a><a href="/planner">Planner</a><a href="/applications" aria-current="page">Applications</a></nav>
+      <button id="theme" class="theme-button" type="button">Dark mode</button>
+    </div>
+  </header>
+  <main id="applications-main" class="wrap factory-page">
+    <div class="factory-intro">
+      <h1>Production workcells</h1>
+      <p>See how one robotic arm handles three assembly and material-handling tasks in simulation.</p>
+    </div>
+    <div class="factory-select" role="group" aria-label="Production scenario">
+      <button type="button" data-scenario="automotive" aria-pressed="true">Automotive</button>
+      <button type="button" data-scenario="electronics" aria-pressed="false">Electronics</button>
+      <button type="button" data-scenario="palletizing" aria-pressed="false">Logistics</button>
+    </div>
+    <section class="panel factory-panel" aria-labelledby="application-title">
+      <div class="factory-heading">
+        <h2 id="application-title">Door installation</h2>
+        <p id="application-description">A finished door transfers from the parts conveyor to an indexed vehicle body.</p>
+      </div>
+      <div id="applications-scene" class="factory-stage">
+        <p>Loading the 3D workcell…</p>
+      </div>
+      <div class="factory-controls">
+        <div class="factory-buttons">
+          <button type="button" id="run-application" class="button primary" disabled>Play</button>
+          <button type="button" id="restart-application" class="button secondary" disabled>Restart</button>
+          <button type="button" id="estop-application" class="danger-button" disabled>E-stop</button>
+        </div>
+        <label>Camera<select id="camera"><option value="overview">Overview</option><option value="robot">Robot</option><option value="installation">Installation</option><option value="top">Top</option></select></label>
+        <label>Speed<select id="cycle-speed"><option value=".5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select></label>
+      </div>
+      <p id="cell-status-text" class="factory-status" role="status">Loading the workcell…</p>
+      <dl class="factory-metrics">
+        <div><dt>Planning time</dt><dd id="planning-time">—</dd></div>
+        <div><dt>Simulated execution</dt><dd id="execution-time">0.0 s</dd></div>
+        <div><dt>Playback elapsed</dt><dd id="playback-time">0.0 s</dd></div>
+        <div><dt>Completed cycles</dt><dd id="cycle-count">0</dd></div>
+      </dl>
+      <div class="factory-trace">
+        <h3>Task sequence</h3>
+        <ol id="application-plan"></ol>
+      </div>
+    </section>
+    <p class="factory-note">Drag to orbit and scroll to zoom. Timings are from this simulation.</p>
+  </main>
+  <footer><div class="wrap footer-grid"><div><strong>BW ROBOTICS</strong><span>Fundamentals of Artificial Intelligence microproject</span></div><div><a href="/">Home</a><a href="/planner">Planner</a><a href="/applications">Applications</a></div></div></footer>
+  <script type="module" src="{{ url_for('static', filename='applications.js', v='13') }}"></script>
+</body>
+</html>

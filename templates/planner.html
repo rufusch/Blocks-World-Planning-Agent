@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <title>Blocks World Planner</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='5') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='planner.css', v='1') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='site.css', v='1') }}">
+  <script type="importmap">
+  {"imports":{"three":"{{ url_for('static', filename='vendor/three/three.module.min.js') }}","three/addons/":"{{ url_for('static', filename='vendor/three/addons/') }}"}}
+  </script>
+</head>
+<body class="planner-page">
+<a class="skip-link" href="#planner">Skip to planning studio</a>
+<div id="asset-error" hidden style="margin:0;padding:12px 20px;background:#fff1f2;color:#9f2632;border-bottom:1px solid #e6a7ad;font:14px/1.4 Segoe UI,Arial,sans-serif">
+  The frontend files did not load. Start this project with <strong>python app.py</strong> and open <strong>http://127.0.0.1:5050</strong>; do not open this HTML file directly.
+</div>
+<header class="app-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="/"><span class="brand-icon">BW</span> BW ROBOTICS</a>
+    <nav class="main-nav"><a href="/">Home</a><a class="active" href="/planner">Planner</a><a href="/applications">Applications</a></nav>
+    <div class="header-meta"><button id="theme" class="theme-button" aria-label="Toggle theme" title="Toggle theme">Dark mode</button></div>
+  </div>
+</header>
+
+<main id="planner" class="wrap main-content" tabindex="-1">
+  <div class="page-heading">
+    <div><h1>Planning workbench</h1><p>Define an initial and goal state, then inspect the shortest plan and its execution.</p></div>
+    <span id="autosave" class="autosave"><i></i>Workspace saved</span>
+  </div>
+
+  <section class="panel configuration-panel" aria-labelledby="configuration-title">
+    <div class="panel-header"><div><h2 id="configuration-title">Problem configuration</h2><p>Stacks are written from bottom to top.</p></div></div>
+    <div class="settings-row">
+      <label><span>Number of blocks</span><select id="n-blocks"></select></label>
+      <label><span>Example problem</span><select id="preset"></select></label>
+      <label><span>Saved configuration</span><select id="saved"><option value="">None</option></select></label>
+      <label><span>Search budget</span><select id="max-expansions"><option value="120000">120k states</option><option value="500000" selected>500k states</option><option value="1000000">1m states</option></select></label>
+      <div class="settings-actions"><button class="button secondary" id="random">Randomize</button><button class="button secondary" id="swap">Swap states</button><button class="button secondary" id="save">Save</button><button class="button text-button" id="reset">Reset</button></div>
+    </div>
+
+    <div class="state-columns">
+      <article class="state-card">
+        <div class="state-card-header"><div><span class="state-number">1</span><h3>Initial state</h3></div><small>Drag the top block</small></div>
+        <div id="initial-editor" class="editor"></div>
+        <label class="notation-label"><span>State notation</span><input id="initial-text" class="text-input" aria-label="Initial state text" placeholder="A C | B"></label>
+      </article>
+      <article class="state-card goal-card">
+        <div class="state-card-header"><div><span class="state-number">2</span><h3>Goal state</h3></div><small>Drag the top block</small></div>
+        <div id="goal-editor" class="editor"></div>
+        <label class="notation-label"><span>State notation</span><input id="goal-text" class="text-input" aria-label="Goal state text" placeholder="C B A"></label>
+      </article>
+    </div>
+    <div id="errors" class="errors" role="alert"></div>
+    <div class="configuration-footer"><div><strong>Optimal A* search</strong><span>Returns the shortest legal action sequence.</span></div><div class="solve-actions"><button id="cancel-solve" class="button secondary" hidden>Cancel</button><button id="solve" class="button primary">Plan and simulate</button></div></div>
+  </section>
+
+  <div id="empty" class="empty-state"><div class="empty-icon">▶</div><div><strong>No plan generated</strong><p>Configure a problem and select “Plan and simulate”.</p></div></div>
+
+  <section id="result" hidden aria-labelledby="results-title">
+    <div class="results-heading"><div><h2 id="results-title">Plan results</h2><p>Search performance and execution output.</p></div><span id="run-status" class="run-status"><i></i><span>Ready</span></span></div>
+    <div id="summary" class="result-summary"></div>
+
+    <div id="simulation" class="panel simulation-panel">
+      <div class="panel-header simulation-header"><div><h2>Robot execution</h2><p id="action-label">Awaiting command</p></div><div class="simulation-tools"><div class="camera-presets" aria-label="Camera presets"><button data-camera="overview">Overview</button><button data-camera="robot">Robot</button><button data-camera="top">Top</button></div><button id="emergency-stop" class="emergency-button">■ Emergency stop</button><div id="clock" class="execution-clock">00:00.0</div></div></div>
+      <div class="scene-wrap">
+        <div class="stage-label">SIMULATION VIEW</div>
+        <div id="scene" class="scene" aria-label="Robot arm executing the block plan"></div>
+      </div>
+      <div class="decision-bar"><span id="decision-kind">READY</span><div><strong id="decision-title">Plan loaded</strong><p id="explain">Start the simulation to execute the optimal plan.</p></div></div>
+      <div class="transport">
+        <div class="step-buttons"><button class="icon-button" id="first" title="First step">|‹</button><button class="icon-button" id="prev" title="Previous step">‹</button><button class="button primary play-button" id="play">▶ Run simulation</button><button class="icon-button" id="next" title="Next step">›</button><button class="icon-button" id="last" title="Last step">›|</button></div>
+        <div class="timeline"><input type="range" id="timeline" min="0" value="0" aria-label="Simulation timeline"><div><span id="stepno">Step 0</span><span id="progress-label">0%</span></div></div>
+        <label class="speed-control"><span>Playback speed <b id="speed-label">1.5×</b></span><input type="range" id="speed" min="1" max="5" value="4"></label>
+      </div>
+    </div>
+
+    <div class="output-grid">
+      <article class="panel output-panel"><div class="output-header"><h3>Action plan</h3><span id="plan-count">0 actions</span></div><ol id="p-plan" class="output-list plan-list"></ol></article>
+      <article class="panel output-panel"><div class="output-header"><h3>Current world state</h3><span>Predicates</span></div><div id="p-state" class="predicate-list"></div></article>
+      <article class="panel output-panel"><div class="output-header"><h3>Remaining actions</h3><span>Next first</span></div><ul id="p-stack" class="output-list remaining-list"></ul></article>
+    </div>
+      <div id="comparison-panel" class="comparison-panel panel" hidden>
+        <div class="output-header"><div><span class="section-tag">PLANNER BENCHMARK</span><h3>A* versus Goal Stack Planning</h3></div><span>Same initial and goal state</span></div>
+        <div class="comparison-grid">
+          <div class="comparison-algorithm"><div><strong>A* optimal</strong><span id="compare-astar-status">Shortest plan</span></div><div class="comparison-value"><b id="compare-astar-actions">—</b><small>actions</small></div><div class="comparison-bar"><i id="compare-astar-bar"></i></div><dl><div><dt>Planning time</dt><dd id="compare-astar-time">—</dd></div><div><dt>States expanded</dt><dd id="compare-astar-expanded">—</dd></div></dl></div>
+          <div class="comparison-algorithm"><div><strong>Goal Stack Planner</strong><span id="compare-gsp-status">Teaching baseline</span></div><div class="comparison-value"><b id="compare-gsp-actions">—</b><small>actions</small></div><div class="comparison-bar baseline"><i id="compare-gsp-bar"></i></div><dl><div><dt>Planning time</dt><dd id="compare-gsp-time">—</dd></div><div><dt>Iterations</dt><dd id="compare-gsp-iterations">—</dd></div></dl></div>
+        </div>
+        <p id="comparison-verdict" class="comparison-verdict"></p>
+      </div>
+    <div class="export-row"><span>Export results</span><button class="button secondary" id="ex-json">JSON</button><button class="button secondary" id="ex-txt">Text report</button><button class="button secondary" id="ex-print">Print</button></div>
+  </section>
+
+  <section class="examples-section"><div class="section-heading"><h2>Example problems</h2><p>Load a standard Blocks World planning problem.</p></div><div id="example-cards" class="example-grid"></div></section>
+</main>
+
+<footer><div class="wrap footer-grid"><div><strong>BW ROBOTICS</strong><span>Intelligent planning and robot execution</span></div><div><a href="/">Home</a><a href="/planner">Planner</a><a href="/applications">Applications</a></div><span>Optimal A* search · Three.js · Python and Flask</span></div></footer>
+<script src="{{ url_for('static', filename='app.js', v='10') }}"></script>
+<script>
+  if (!window.BLOCKS_WORLD_APP_LOADED) document.getElementById("asset-error").hidden = false;
+</script>
+</body>
+</html>

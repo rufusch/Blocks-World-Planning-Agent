@@ -1,0 +1,48 @@
+Command: python cli.py --demo
+
+====================================================================
+Simple tower
+====================================================================
+Initial : A | B | C
+Goal    : A B C
+Result  : OPTIMAL - 4 actions
+Search  : 6 expanded, 5 peak frontier, 0.27 ms
+Plan:
+   1. PICKUP(B)
+   2. STACK(B,A)
+   3. PICKUP(C)
+   4. STACK(C,B)
+
+====================================================================
+Sussman anomaly
+====================================================================
+Initial : A C | B
+Goal    : C B A
+Result  : OPTIMAL - 6 actions
+Search  : 10 expanded, 5 peak frontier, 0.26 ms
+Plan:
+   1. UNSTACK(C,A)
+   2. PUTDOWN(C)
+   3. PICKUP(B)
+   4. STACK(B,C)
+   5. PICKUP(A)
+   6. STACK(A,B)
+
+====================================================================
+Reverse four
+====================================================================
+Initial : A B C D
+Goal    : D C B A
+Result  : OPTIMAL - 8 actions
+Search  : 8 expanded, 3 peak frontier, 0.21 ms
+Plan:
+   1. UNSTACK(D,C)
+   2. PUTDOWN(D)
+   3. UNSTACK(C,B)
+   4. STACK(C,D)
+   5. UNSTACK(B,A)
+   6. STACK(B,C)
+   7. PICKUP(A)
+   8. STACK(A,B)
+
+Note: Planning times vary slightly between runs and computers.

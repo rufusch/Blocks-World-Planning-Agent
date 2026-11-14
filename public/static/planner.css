@@ -1,0 +1,15 @@
+/* Isolated workspace layout. This intentionally neutralizes landing-page rules. */
+body.planner-page{background:var(--page)}
+.planner-page .app-header{height:68px;border-bottom:1px solid var(--border);background:var(--panel)}
+.planner-page .header-inner{max-width:1228px}
+.planner-page .main-nav{margin-left:auto;margin-right:26px}
+.planner-page .main-content{max-width:1180px;margin:0 auto;padding:46px 24px 80px}
+.planner-page .page-heading{align-items:center;margin-bottom:22px}
+.planner-page .page-heading h1{font-size:2rem}
+.planner-page .configuration-panel{overflow:hidden}
+.planner-page .settings-row{gap:14px}
+.planner-page .state-card{min-width:0}
+.planner-page .editor{min-height:235px}
+.planner-page .examples-section{padding-top:58px;margin-top:70px;border-top:1px solid var(--border)}
+.planner-page footer{background:var(--panel)}
+@media(max-width:900px){.planner-page .main-content{padding-top:30px}.planner-page .main-nav{display:none}}
